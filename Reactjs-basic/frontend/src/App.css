@@ -1,0 +1,22 @@
+body {
+  margin:0;
+  padding:0;
+}
+.header{
+  background-color: black;
+  color:white;
+  text-align:center;
+  padding: 10px
+  /* margin: 33px; */
+}
+
+ul{
+  display:flex;
+  float:right;
+}
+li{
+  list-style-type:none;
+  /* remove the list dot '.' property */
+
+  padding: 10px 14px;
+}
