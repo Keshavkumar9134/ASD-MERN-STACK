@@ -11,7 +11,7 @@ const jobSchema = new mongoose.Schema({
     salary:{type:Number,default:0},
     description:{type:String,required:true},
 
-    jobimage:{type:String,default:""},
+    image:{type:String,default:""},
     
 },
 {timestamps:true}

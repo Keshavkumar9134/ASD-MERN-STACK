@@ -1,50 +1,75 @@
-const job = require("../models/job");
+const Job = require("../models/job");
 const fs = require("fs");
 const path = require("path");
 
-//function for old image delete
-function deletefileexists(filepathfromroot){
-    try{
-        if(!filepathfromroot) return;
-        const fullpath = path.join(__dirname,"..",filepathfromroot);
-        if(fs.existsSync(fullpath)) fs.unlinkSync(fullpath);//to upload the new file , first have to unlink the old image deleted file
-    }catch(e){
-        console.error(e);
-    }
+function deleteFileIfExists(filePathFromRoot) {
+  try {
+    if (!filePathFromRoot) return;
+
+    // Avoid absolute-path join issues if stored path starts with "/"
+    const safeRelativePath = filePathFromRoot.replace(/^[/\\]+/, "");
+    const fullPath = path.join(__dirname, "..", safeRelativePath);
+
+    if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+  } catch (e) {
+    console.error(e);
+  }
 }
 
-//createjob: have to send all fields of job as request  to server.js 
-exports.createjob = async(req,res)=>{
-    const {title,company,location,salary,description} = req.body;  //destructing from body to send request to server
-    const jobimage = req.file? `/uploads/jobs/${req.file.filename}`:""; //send request for file
-    const  job = await job.create({//insert all destructuring fields into new 'job', so inserted using 'job.create'
-        title,
-        company,
-        location,
-        salary :salary ? Number(salary) : 0,
-        description,
-        jobimage
+exports.createjob = async (req, res) => {
+  try {
+    const { title, company, location, salary, description } = req.body;
+    const image = req.file ? `/uploads/jobs/${req.file.filename}` : "";
+
+    const newJob = await Job.create({
+      title,
+      company,
+      location,
+      salary: salary ? Number(salary) : 0,
+      description,
+      image,
     });
 
-    res.status(201).json({success:true,message:"job created...",job});
+    res.status(201).json({ success: true, msg: "Job created", job: newJob });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, msg: "Failed to create job" });
+  }
 };
 
-//get all the jobs
-exports.getalljobs = async(req,res)=>{
-    const jobs = await job.find();
-    res.status(201).json({success:true, mess:"job created",total:jobs.length,job});
-}
+exports.getalljobs = async (req, res) => {
+  try {
+    const jobs = await Job.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, total: jobs.length, jobs });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, msg: "Failed to fetch jobs" });
+  }
+};
 
-//get single job
-exports.getbyjob = async(req,res)=>{
-    const job = await job.findById(req.params.id);//to fetch inside the body,"paarams" is used
-    res.status(201).json(job);
-}
+exports.getbyjob = async (req, res) => {
+  try {
+    const found = await Job.findById(req.params.id);
+    if (!found) return res.status(404).json({ success: false, msg: "Job not found" });
 
-//delete
-exports.deletejob = async(req,res)=>{
-    const job = await job.findById(req.params.id);
-    deletefileexists(job.jobimage);
-    await job.findByIdAndDelete(req.params.id);
-    res.status(201).json({message:"job deleted"});
-}
+    res.status(200).json({ success: true, job: found });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, msg: "Failed to fetch job" });
+  }
+};
+
+exports.deletejob = async (req, res) => {
+  try {
+    const found = await Job.findById(req.params.id);
+    if (!found) return res.status(404).json({ success: false, msg: "Job not found" });
+
+    deleteFileIfExists(found.image);
+    await Job.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ success: true, msg: "Job deleted" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, msg: "Failed to delete job" });
+  }
+};
