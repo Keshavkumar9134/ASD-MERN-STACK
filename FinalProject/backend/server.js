@@ -5,7 +5,7 @@ const path = require("path");//for access static files(uploads) in server.js
 require("dotenv").config();//to secure/config the dotenv
 const connectdb = require("./config/db");
 const jobroutes = require("./routes/jobroutes");
-
+const  authroutes = require("./routes/authRoutes");
 
 const app = express();//to call express.js
 
@@ -18,6 +18,7 @@ app.use('/uploads',express.static(path.join(__dirname,"uploads")));
 
 connectdb();
 app.use("/api/jobs",jobroutes);
+app.use('/api/auth',authroutes);
 
 app.get('/',(req,res)=>{
     res.send("api is working..");

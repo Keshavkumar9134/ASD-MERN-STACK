@@ -1,16 +1,25 @@
-import React from "react";
-import { Container, Typography } from "@mui/material";
-import Jobspage from "./pages/jobspage";
-
+import React from 'react'
+import { Routes,Route,BrowserRouter } from 'react-router-dom'
+import Register from './pages/Register'
+import Navbar from './components/Navbar'
+import Login from './pages/Login'
+import PrivateRoute from './utils/PrivateRoute'
+import Home from './components/Home'
 const App = () => {
-  return (
-    <Container maxWidth="md" sx={{ py: 3 }}>
-      <Typography variant="h4" fontWeight={800} sx={{ mb: 2 }}>
-        JOB CRUD
-      </Typography>
-      <Jobspage />
-    </Container>
-  );
-};
+  return <>
+  <BrowserRouter>
+  <Navbar/>
+  <Routes>
+  <Route path="/" element={<Register/>}></Route>
+    <Route path="/login" element={<Login/>}></Route>
+      <Route element={<PrivateRoute/>}>
+      <Route path="/home" element={<Home/>}></Route>
+      </Route> 
 
-export default App;
+  </Routes>
+  </BrowserRouter>
+  
+  </>
+}
+
+export default App
